@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اپلیکیشن بچه‌های علی لندی</title>
+    <!-- بارگذاری مستقیم فونت وزیرمتن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        /* ==========================================
+           ۱. متغیرهای سیستم و تم رنگی اپلیکیشن
+           ========================================== */
+        :root {
+            --bg-main: #081922;
+            --bg-card: #0d2532;
+            --bg-card-hover: #123040;
+            --bg-darker: #040c11;
+            --bg-input: #07151e;
+            --accent-teal: #0ea5a4;
+            --accent-teal-glow: rgba(14, 165, 164, 0.4);
+            --accent-teal-light: #1ce2e0;
+            --accent-orange: #e54b18;
+            --accent-orange-glow: rgba(229, 75, 24, 0.4);
+            --accent-gold: #f5b027;
+            --accent-gold-light: #ffd700;
+            --accent-gold-glow: rgba(245, 176, 39, 0.4);
+            --text-white: #ffffff;
+            --text-muted: #a0aec0;
+            --text-dark: #64748b;
+            --border-teal: rgba(14, 165, 164, 0.3);
+            --border-gold: rgba(245, 176, 39, 0.3);
+            --border-orange: rgba(229, 75, 24, 0.3);
+            --shadow-deep: 0 10px 30px rgba(0, 0, 0, 0.7);
+            --shadow-glow: 0 0 20px var(--accent-teal-glow);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 22px;
+            --radius-full: 9999px;
+            --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* ==========================================
+           ۲. ریست عمومی و تنظیمات پایه
+           ========================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #02070a;
+            color: var(--text-white);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            direction: rtl;
+        }
+
+        /* اسکرول بار سفارشی */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-darker);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-teal);
+            border-radius: var(--radius-full);
+        }
+
+        /* ==========================================
+           ۳. کانتینر اصلی موبایل (شبیه‌ساز گوشی)
+           ========================================== */
+        .app-shell {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            max-height: 920px;
+            background-color: var(--bg-main);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 2px var(--accent-teal);
+        }
+
+        @media (min-width: 481px) {
+            .app-shell {
+                height: 95vh;
+                border-radius: 36px;
+                border: 2px solid rgba(14, 165, 164, 0.4);
+            }
+        }
+
+        /* ==========================================
+           ۴. انیمیشن‌ها و کی‌فریم‌ها
+           ========================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px var(--accent-teal-glow); }
+            50% { box-shadow: 0 0 30px var(--accent-teal-glow), 0 0 10px var(--accent-teal-light); }
+        }
+
+        @keyframes badgeShine {
+            0% { filter: drop-shadow(0 0 2px rgba(245, 176, 39, 0.5)); }
+            50% { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); }
+            100% { filter: drop-shadow(0 0 2px rgba(245, 176, 39, 0.5)); }
+        }
+
+        @keyframes floatEffect {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes rotateBorder {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ==========================================
+           ۵. ساختار صفحات و هدر
+           ========================================== */
+        .page-view {
+            display: none;
+            width: 100%;
+            height: calc(100% - 75px);
+            overflow-y: auto;
+            padding-bottom: 30px;
+            animation: fadeIn 0.35s ease-in-out;
+        }
+
+        .page-view.active {
+            display: block;
+        }
+
+        .app-top-header {
+            height: 65px;
+            background: linear-gradient(180deg, var(--bg-darker) 0%, var(--bg-main) 100%);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-teal);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent-teal), #065e5d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px var(--accent-teal-glow);
+        }
+
+        .header-title-text {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--text-white);
+            letter-spacing: -0.3px;
+        }
+
+        .header-action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .header-action-btn:active {
+            transform: scale(0.92);
+            background: var(--accent-teal);
+        }
+
+        /* ==========================================
+           ۶. کارت‌ها و کامپوننت‌های عمومی
+           ========================================== */
+        .custom-card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius-lg);
+            margin: 16px;
+            padding: 18px;
+            border: 1px solid var(--border-teal);
+            box-shadow: var(--shadow-deep);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .custom-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-teal), transparent);
+        }
+
+        /* ==========================================
+           ۷. استایل اختصاصی صفحه پروفایل سبحان
+           ========================================== */
+        .profile-banner {
+            position: relative;
+            padding: 35px 20px 25px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(14, 165, 164, 0.12) 0%, rgba(8, 25, 34, 0) 100%);
+            border-bottom: 1px solid var(--border-teal);
+        }
+
+        .avatar-ring-wrapper {
+            position: relative;
+            width: 125px;
+            height: 125px;
+            margin: 0 auto 18px;
+        }
+
+        .avatar-ring-glow {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--accent-teal), var(--accent-gold), var(--accent-orange));
+            animation: rotateBorder 6s linear infinite;
+            filter: blur(4px);
+            opacity: 0.85;
+        }
+
+        .avatar-inner-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: var(--bg-card);
+            overflow: hidden;
+            border: 3px solid var(--bg-main);
+            box-shadow: var(--shadow-deep);
+        }
+
+        .avatar-inner-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .avatar-fallback-initial {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #103244, #081922);
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--accent-teal);
+        }
+
+        .profile-user-name {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: var(--text-white);
+            margin-bottom: 6px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .profile-date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            background: rgba(14, 165, 164, 0.12);
+            border: 1px solid var(--border-teal);
+            font-size: 0.82rem;
+            color: var(--accent-teal-light);
+            margin-bottom: 22px;
+        }
+
+        /* بخش نشان‌های سه‌گانه (همت، جنم، الماس) */
+        .badges-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 22px;
+            margin-top: 10px;
+        }
+
+        .badge-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+        }
+
+        .badge-svg-container {
+            width: 62px;
+            height: 72px;
+            position: relative;
+            animation: badgeShine 3s infinite alternate;
+        }
+
+        .badge-label-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            margin-top: 8px;
+            color: var(--text-white);
+        }
+
+        /* ==========================================
+           ۸. صفحه گروه و اعضا
+           ========================================== */
+        .group-hero-card {
+            background: linear-gradient(135deg, #132e3d 0%, #081922 100%);
+            border: 1px solid var(--border-orange);
+            text-align: center;
+            padding: 22px 16px;
+        }
+
+        .group-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--accent-orange);
+            margin-bottom: 8px;
+        }
+
+        .group-tagline {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .group-leader-pill {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(229, 75, 24, 0.15);
+            border: 1px solid var(--border-orange);
+            border-radius: var(--radius-full);
+            font-size: 0.78rem;
+            color: var(--accent-orange);
+            font-weight: 700;
+        }
+
+        .members-section-header {
+            padding: 0 20px;
+            margin: 20px 0 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .members-count-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-white);
+        }
+
+        /* استایل لیست اعضا - سبحان با عکس، بقیه با حرف اول */
+        .member-row-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            margin: 0 16px 10px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition-fast);
+        }
+
+        .member-row-item:active {
+            transform: scale(0.98);
+            background: var(--bg-card-hover);
+        }
+
+        .member-avatar-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #163646, #091c26);
+            border: 2px solid var(--accent-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.15rem;
+            color: var(--accent-teal);
+            margin-left: 14px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .member-avatar-box.is-sobhan {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 10px var(--accent-gold-glow);
+        }
+
+        .member-avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-details {
+            flex: 1;
+        }
+
+        .member-name-text {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-white);
+            margin-bottom: 4px;
+        }
+
+        .member-score-text {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .member-self-tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            background: var(--accent-gold);
+            color: #000;
+            border-radius: var(--radius-sm);
+            font-weight: 900;
+            margin-right: 6px;
+        }
+
+        /* ==========================================
+           ۹. صفحه ورود (Login Screen)
+           ========================================== */
+        .login-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--bg-main) 0%, #02080c 100%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .login-emblem-box {
+            width: 110px;
+            height: 110px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, var(--bg-card), #081a24);
+            border: 2px solid var(--accent-teal);
+            box-shadow: var(--shadow-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            animation: floatEffect 4s ease-in-out infinite;
+        }
+
+        .login-form-card {
+            width: 100%;
+            max-width: 360px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 26px 20px;
+            border: 1px solid var(--border-teal);
+            box-shadow: var(--shadow-deep);
+        }
+
+        .form-group-item {
+            margin-bottom: 16px;
+        }
+
+        .form-input-field {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-teal);
+            border-radius: var(--radius-md);
+            color: var(--text-white);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition-fast);
+        }
+
+        .form-input-field:focus {
+            border-color: var(--accent-teal-light);
+            box-shadow: 0 0 12px var(--accent-teal-glow);
+        }
+
+        .btn-submit-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-teal), #087372);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-white);
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 6px 20px var(--accent-teal-glow);
+            transition: var(--transition-fast);
+        }
+
+        .btn-submit-login:active {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+    <!-- ==========================================
+         صفحه ۰: ورود به اپلیکیشن (LOGIN)
+         ========================================== -->
+    <div id="login-screen" class="login-overlay">
+        <div class="login-emblem-box">
+            <svg viewBox="0 0 24 24" width="55" height="55" fill="var(--accent-gold)">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+            </svg>
+        </div>
+        <h2 style="font-weight: 900; font-size: 1.5rem; margin-bottom: 8px; color: var(--text-white);">خوش آمدید</h2>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 26px;">اپلیکیشن اختصاصی بچه‌های علی لندی</p>
+
+        <div class="login-form-card">
+            <div class="form-group-item">
+                <input type="text" class="form-input-field" value="sobhan_owhadi" placeholder="نام کاربری">
+            </div>
+            <div class="form-group-item">
+                <input type="password" class="form-input-field" value="••••••••" placeholder="رمز عبور">
+            </div>
+            <button class="btn-submit-login" onclick="handleLoginAction()">ورود به حساب کاربری</button>
+            <div style="text-align: center; margin-top: 16px;">
+                <span style="font-size: 0.8rem; color: var(--accent-teal-light); cursor: pointer;" onclick="triggerToast('بازیابی رمز عبور به سرگروه پیام دهید')">رمز عبور خود را فراموش کرده‌اید؟</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         هدر بالای برنامه (HEADER)
+         ========================================== -->
+    <header class="app-top-header" id="app-top-header" style="display: none;">
+        <div class="header-brand">
+            <div class="header-logo-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="white">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+                </svg>
+            </div>
+            <span class="header-title-text">بچه‌های علی لندی</span>
+        </div>
+        <div class="header-action-btn" onclick="triggerToast('اعلانی وجود ندارد')">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--text-muted)">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+            </svg>
+        </div>
+    </header>
+
+    <!-- ==========================================
+         صفحه ۱: پروفایل سبحان (PROFILE)
+         ========================================== -->
+    <div id="page-profile" class="page-view active">
+        <div class="profile-banner">
+            <div class="avatar-ring-wrapper">
+                <div class="avatar-ring-glow"></div>
+                <div class="avatar-inner-box">
+                    <!-- عکس اختصاصی سبحان -->
+                    <img src="sobhan.jpg" alt="محمد سبحان اوحدی" onerror="this.onerror=null; this.outerHTML='<div class=&quot;avatar-fallback-initial&quot;>س</div>';">
+                </div>
+            </div>
+            <h1 class="profile-user-name">محمد سبحان اوحدی</h1>
+            <div class="profile-date-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                </svg>
+                <span>عضویت از اردیبهشت ماه ۱۴۰۵</span>
+            </div>
+
+            <!-- نشان‌های سه‌گانه همت (۳)، جنم (۰)، الماس (۰) -->
+            <div class="badges-grid">
+                <!-- نشان همت = ۳ -->
+                <div class="badge-card">
+                    <div class="badge-svg-container">
+                        <svg viewBox="0 0 50 60" width="100%" height="100%">
+                            <defs>
+                                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffd700" />
+                                    <stop offset="100%" stop-color="#f5b027" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M25 0 L50 10 L50 35 C50 50 25 60 25 60 C25 60 0 50 0 35 L0 10 Z" fill="url(#goldGrad)" />
+                            <path d="M8 38 L42 38 L42 44 Q25 54 8 44 Z" fill="#e54b18" />
+                            <text x="50%" y="45" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="900">۳</text>
+                            <path d="M25 12 L28 19 L35 19 L30 24 L32 31 L25 27 L18 31 L20 24 L15 19 L22 19 Z" fill="#081922" />
+                        </svg>
+                    </div>
+                    <span class="badge-label-title">همت</span>
+                </div>
+
+                <!-- نشان جنم = ۰ -->
+                <div class="badge-card">
+                    <div class="badge-svg-container">
+                        <svg viewBox="0 0 50 60" width="100%" height="100%">
+                            <path d="M25 0 L50 10 L50 35 C50 50 25 60 25 60 C25 60 0 50 0 35 L0 10 Z" fill="#4a5568" />
+                            <path d="M8 38 L42 38 L42 44 Q25 54 8 44 Z" fill="#2d3748" />
+                            <text x="50%" y="45" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="900">۰</text>
+                            <circle cx="25" cy="22" r="7" fill="#081922" />
+                        </svg>
+                    </div>
+                    <span class="badge-label-title" style="color: var(--text-muted);">جنم</span>
+                </div>
+
+                <!-- نشان الماس = ۰ -->
+                <div class="badge-card">
+                    <div class="badge-svg-container">
+                        <svg viewBox="0 0 50 60" width="100%" height="100%">
+                            <path d="M25 0 L50 10 L50 35 C50 50 25 60 25 60 C25 60 0 50 0 35 L0 10 Z" fill="#2d3748" />
+                            <path d="M8 38 L42 38 L42 44 Q25 54 8 44 Z" fill="#1a202c" />
+                            <text x="50%" y="45" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="900">۰</text>
+                            <path d="M25 14 L33 22 L29 30 L21 30 L17 22 Z" fill="#081922" />
+                        </svg>
+                    </div>
+                    <span class="badge-label-title" style="color: var(--text-muted);">الماس</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- اطلاعات باشگاه -->
+        <div class="custom-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">باشگاه فعال من</div>
+                    <div style="font-size: 1.1rem; font-weight: 900; color: var(--accent-teal-light);">باشگاه علی لندی</div>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 176, 39, 0.15); border: 1px solid var(--border-gold); display: flex; align-items: center; justify-content: center;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-gold)">
+                        <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- کیف پول -->
+        <div class="custom-card" style="background: linear-gradient(135deg, #0d2836 0%, #081922 100%);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 48px; height: 48px; border-radius: 14px; background: var(--accent-teal); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px var(--accent-teal-glow);">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="white">
+                        <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">موجودی کیف پول</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: var(--text-white);">۰ تومان</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         صفحه ۲: گروه و اعضا (GROUP / HOME)
+         ========================================== -->
+    <div id="page-home" class="page-view">
+        <div class="custom-card group-hero-card">
+            <h2 class="group-title">بچه‌های علی لندی</h2>
+            <p class="group-tagline">"در امتحان شعله‌ها پیروز بودی..."</p>
+            <div class="group-leader-pill">سرگروه: تعیین نشده</div>
+        </div>
+
+        <div class="members-section-header">
+            <span class="members-count-title">اعضای گروه (۱۰ نفر)</span>
+            <span style="font-size: 0.78rem; color: var(--accent-teal-light);">ترتیب بر اساس امتیاز</span>
+        </div>
+
+        <!-- لیست ۱۰ عضو اصلی - فقط سبحان عکس دارد -->
+        <div class="member-row-item">
+            <div class="member-avatar-box is-sobhan">
+                <img src="sobhan.jpg" alt="سبحان" onerror="this.outerHTML='س';">
+            </div>
+            <div class="member-details">
+                <div class="member-name-text">
+                    <span>محمد سبحان اوحدی</span>
+                    <span class="member-self-tag">شما</span>
+                </div>
+                <div class="member-score-text">امتیاز کل: ۷۳۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">ح</div>
+            <div class="member-details">
+                <div class="member-name-text">حسین اکبری</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">ا</div>
+            <div class="member-details">
+                <div class="member-name-text">امیرعلی استقلال</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">ب</div>
+            <div class="member-details">
+                <div class="member-name-text">بردیا بهمنی</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">م</div>
+            <div class="member-details">
+                <div class="member-name-text">محمدامین مصلی‌نژاد</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">م</div>
+            <div class="member-details">
+                <div class="member-name-text">ماهان عاصی شیرازی</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">ع</div>
+            <div class="member-details">
+                <div class="member-name-text">علی محمدی</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">ر</div>
+            <div class="member-details">
+                <div class="member-name-text">رضا کریمی</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">م</div>
+            <div class="member-details">
+                <div class="member-name-text">مهدی حسینی</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+
+        <div class="member-row-item">
+            <div class="member-avatar-box">ی</div>
+            <div class="member-details">
+                <div class="member-name-text">یوسف رضایی</div>
+                <div class="member-score-text">امتیاز کل: ۰</div>
+            </div>
+        </div>
+    </div>
+        <!-- ==========================================
+         صفحه ۳: برنامه‌ها و پنل رشد (PLANS & GROWTH)
+         ========================================== -->
+    <div id="page-plans" class="page-view">
+        <!-- کارت اصلی وضعیت رشد -->
+        <div class="custom-card" style="background: linear-gradient(135deg, rgba(14, 165, 164, 0.25) 0%, rgba(8, 25, 34, 0.9) 100%); border-color: var(--accent-teal);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                    <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--accent-teal-light); margin-bottom: 4px;">پنل رشد معنوی و تربیتی</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">گزارش عملکرد روزانه محمد سبحان اوحدی</p>
+                </div>
+                <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--accent-teal-glow); display: flex; align-items: center; justify-content: center; border: 1px solid var(--accent-teal-light);">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="var(--accent-teal-light)">
+                        <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px;">
+                    <span style="color: var(--text-muted);">پیشرفت کل هفته</span>
+                    <span style="color: var(--accent-gold); font-weight: 800;" id="overall-progress-text">۱۵٪</span>
+                </div>
+                <div style="width: 100%; height: 10px; background: rgba(0, 0, 0, 0.5); border-radius: var(--radius-full); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div id="overall-progress-bar" style="width: 15%; height: 100%; background: linear-gradient(90deg, var(--accent-teal), var(--accent-gold)); border-radius: var(--radius-full); transition: var(--transition-normal);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- کارت ردیاب نمازهای روزانه -->
+        <div class="custom-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245, 176, 39, 0.15); border: 1px solid var(--border-gold); display: flex; align-items: center; justify-content: center;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--accent-gold)">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-weight: 800; font-size: 1rem; color: var(--text-white);">ثبت نمازهای روزانه</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">"نماز یعنی هیچ‌وقت تنها نیستی"</div>
+                    </div>
+                </div>
+                <div style="background: rgba(14, 165, 164, 0.15); border: 1px solid var(--border-teal); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 900; color: var(--accent-teal-light);" id="prayer-count-badge">۰ از ۵</div>
+            </div>
+
+            <!-- چک‌لیست نمازها -->
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px;">
+                <div onclick="togglePrayerCheck(this)" style="background: var(--bg-input); border: 1px solid var(--border-teal); border-radius: var(--radius-md); padding: 10px 4px; text-align: center; cursor: pointer; transition: var(--transition-fast);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">فجر</div>
+                    <div style="width: 22px; height: 22px; margin: 0 auto; border-radius: 50%; border: 2px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: transparent;">✓</div>
+                </div>
+                <div onclick="togglePrayerCheck(this)" style="background: var(--bg-input); border: 1px solid var(--border-teal); border-radius: var(--radius-md); padding: 10px 4px; text-align: center; cursor: pointer; transition: var(--transition-fast);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">ظهر</div>
+                    <div style="width: 22px; height: 22px; margin: 0 auto; border-radius: 50%; border: 2px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: transparent;">✓</div>
+                </div>
+                <div onclick="togglePrayerCheck(this)" style="background: var(--bg-input); border: 1px solid var(--border-teal); border-radius: var(--radius-md); padding: 10px 4px; text-align: center; cursor: pointer; transition: var(--transition-fast);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">عصر</div>
+                    <div style="width: 22px; height: 22px; margin: 0 auto; border-radius: 50%; border: 2px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: transparent;">✓</div>
+                </div>
+                <div onclick="togglePrayerCheck(this)" style="background: var(--bg-input); border: 1px solid var(--border-teal); border-radius: var(--radius-md); padding: 10px 4px; text-align: center; cursor: pointer; transition: var(--transition-fast);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">مغرب</div>
+                    <div style="width: 22px; height: 22px; margin: 0 auto; border-radius: 50%; border: 2px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: transparent;">✓</div>
+                </div>
+                <div onclick="togglePrayerCheck(this)" style="background: var(--bg-input); border: 1px solid var(--border-teal); border-radius: var(--radius-md); padding: 10px 4px; text-align: center; cursor: pointer; transition: var(--transition-fast);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">عشاء</div>
+                    <div style="width: 22px; height: 22px; margin: 0 auto; border-radius: 50%; border: 2px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: transparent;">✓</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- کارت‌های برنامه‌ها و ماموریت‌ها -->
+        <div style="padding: 0 16px; margin-top: 20px;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-white); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span>ماموریت‌های این هفته</span>
+                <span style="font-size: 0.75rem; color: var(--accent-gold);">امتیاز قابل کسب: ۲۰۰</span>
+            </div>
+
+            <!-- ماموریت ۱: مطالعه کتاب -->
+            <div class="custom-card" style="margin: 0 0 12px 0;">
+                <div style="display: flex; gap: 14px; align-items: center;">
+                    <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(14, 165, 164, 0.15); border: 1px solid var(--border-teal); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-teal-light)">
+                            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                        </svg>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white); margin-bottom: 4px;">مطالعه کتاب "سلام بر ابراهیم"</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">روزانه ۱۵ صفحه مطالعه و خلاصه‌نویسی</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="flex: 1; height: 6px; background: rgba(0, 0, 0, 0.4); border-radius: 3px; overflow: hidden;">
+                                <div style="width: 40%; height: 100%; background: var(--accent-teal);"></div>
+                            </div>
+                            <span style="font-size: 0.72rem; color: var(--accent-teal-light); font-weight: 700;">۴۰٪</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ماموریت ۲: ورزش و آمادگی جسمانی -->
+            <div class="custom-card" style="margin: 0 0 12px 0;">
+                <div style="display: flex; gap: 14px; align-items: center;">
+                    <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(229, 75, 24, 0.15); border: 1px solid var(--border-orange); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-orange)">
+                            <path d="M20.57 14.86L22 13.43 20.57 12l-1.43 1.43-4.57-4.57 1.43-1.43L14.57 6 13.14 7.43 8.57 2.86 7.14 4.29l1.43 1.43L4.14 10.29l-1.43-1.43L1.29 10.29 2.71 11.71l1.43-1.43 4.57 4.57-1.43 1.43L8.71 17.71l1.43-1.43 4.57 4.57-1.43 1.43 1.43 1.43 1.43-1.43 4.57-4.57z"/>
+                        </svg>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white); margin-bottom: 4px;">تمرین آمادگی جسمانی</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">دویدن و شنا سوئدی ۳ جلسه در هفته</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="flex: 1; height: 6px; background: rgba(0, 0, 0, 0.4); border-radius: 3px; overflow: hidden;">
+                                <div style="width: 70%; height: 100%; background: var(--accent-orange);"></div>
+                            </div>
+                            <span style="font-size: 0.72rem; color: var(--accent-orange); font-weight: 700;">۷۰٪</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ماموریت ۳: شرکت در حلقه صالحین -->
+            <div class="custom-card" style="margin: 0 0 12px 0;">
+                <div style="display: flex; gap: 14px; align-items: center;">
+                    <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(245, 176, 39, 0.15); border: 1px solid var(--border-gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-gold)">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        </svg>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white); margin-bottom: 4px;">حضور فعال در حلقه صالحین</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">جلسات هفتگی روزهای پنجشنبه</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="flex: 1; height: 6px; background: rgba(0, 0, 0, 0.4); border-radius: 3px; overflow: hidden;">
+                                <div style="width: 100%; height: 100%; background: var(--accent-gold);"></div>
+                            </div>
+                            <span style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 700;">تکمیل شد ✓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         صفحه ۴: رتبه‌بندی فصل پاییز (RANKING)
+         ========================================== -->
+    <div id="page-ranking" class="page-view">
+        <div style="padding: 24px 20px 10px; text-align: center;">
+            <h2 style="font-weight: 900; font-size: 1.4rem; color: var(--text-white); margin-bottom: 4px;">رتبه‌بندی فصل پاییز</h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">جدول امتیازات گروه‌ها و باشگاه‌های علی لندی</p>
+        </div>
+
+        <!-- تب‌های انتخاب دسته‌بندی رتبه‌بندی -->
+        <div style="display: flex; background: var(--bg-darker); margin: 15px 16px 20px; border-radius: var(--radius-full); padding: 5px; border: 1px solid var(--border-teal);">
+            <div class="ranking-tab-btn active" onclick="switchRankingTab(this, 'clubs')" style="flex: 1; text-align: center; padding: 10px; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: var(--transition-fast); background: var(--accent-teal); color: white;">باشگاه‌ها</div>
+            <div class="ranking-tab-btn" onclick="switchRankingTab(this, 'individual')" style="flex: 1; text-align: center; padding: 10px; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: var(--transition-fast); color: var(--text-muted);">انفرادی</div>
+            <div class="ranking-tab-btn" onclick="switchRankingTab(this, 'myclub')" style="flex: 1; text-align: center; padding: 10px; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: var(--transition-fast); color: var(--text-muted);">باشگاه</div>
+        </div>
+
+        <!-- لیست رتبه‌بندی تیم‌ها (دقیقاً طبق اسکرین‌شات‌ها) -->
+        <div id="ranking-list-container">
+            <!-- رتبه اول: بچه‌های هور -->
+            <div style="display: flex; align-items: center; padding: 16px; margin: 0 16px 12px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-gold); box-shadow: var(--shadow-deep);">
+                <div style="width: 34px; font-weight: 900; color: var(--accent-gold); font-size: 1.3rem; text-align: center;">۱</div>
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #2b4c5e, #102633); border: 2px solid var(--accent-gold); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: var(--accent-gold); margin-left: 14px; flex-shrink: 0;">H</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 900; font-size: 1rem; color: var(--text-white); margin-bottom: 3px;">بچه‌های هور</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">شهرستان شیراز</div>
+                </div>
+                <div style="background: rgba(245, 176, 39, 0.15); border: 1px solid var(--border-gold); padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: 900; color: var(--accent-gold);">۳.۵۰</div>
+            </div>
+
+            <!-- رتبه دوم: بچه‌های تاسوعا -->
+            <div style="display: flex; align-items: center; padding: 16px; margin: 0 16px 12px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.08);">
+                <div style="width: 34px; font-weight: 900; color: #c0c0c0; font-size: 1.3rem; text-align: center;">۲</div>
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #1c3947, #0b1a24); border: 2px solid #c0c0c0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: #c0c0c0; margin-left: 14px; flex-shrink: 0;">T</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 900; font-size: 1rem; color: var(--text-white); margin-bottom: 3px;">بچه‌های تاسوعا</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">شهرستان گراش</div>
+                </div>
+                <div style="background: rgba(14, 165, 164, 0.15); border: 1px solid var(--border-teal); padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: 900; color: var(--accent-teal-light);">۳.۰۹</div>
+            </div>
+
+            <!-- رتبه سوم: بچه‌های کربلا -->
+            <div style="display: flex; align-items: center; padding: 16px; margin: 0 16px 12px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.08);">
+                <div style="width: 34px; font-weight: 900; color: #cd7f32; font-size: 1.3rem; text-align: center;">۳</div>
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #1c3947, #0b1a24); border: 2px solid #cd7f32; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: #cd7f32; margin-left: 14px; flex-shrink: 0;">K</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 900; font-size: 1rem; color: var(--text-white); margin-bottom: 3px;">بچه‌های کربلا</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">شهرستان فسا</div>
+                </div>
+                <div style="background: rgba(14, 165, 164, 0.15); border: 1px solid var(--border-teal); padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: 900; color: var(--accent-teal-light);">۲.۶۷</div>
+            </div>
+
+            <!-- رتبه چهارم: بچه‌های خیبر -->
+            <div style="display: flex; align-items: center; padding: 16px; margin: 0 16px 12px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05);">
+                <div style="width: 34px; font-weight: 800; color: var(--text-muted); font-size: 1.1rem; text-align: center;">۴</div>
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #0e2430; border: 1px solid var(--border-teal); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; color: var(--accent-teal); margin-left: 14px; flex-shrink: 0;">Kh</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white); margin-bottom: 3px;">بچه‌های خیبر</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">شهرستان لارستان</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; color: var(--text-muted);">۲.۱۰</div>
+            </div>
+
+            <!-- رتبه پنجم: بچه‌های نصر -->
+            <div style="display: flex; align-items: center; padding: 16px; margin: 0 16px 12px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05);">
+                <div style="width: 34px; font-weight: 800; color: var(--text-muted); font-size: 1.1rem; text-align: center;">۵</div>
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #0e2430; border: 1px solid var(--border-teal); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; color: var(--accent-teal); margin-left: 14px; flex-shrink: 0;">N</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white); margin-bottom: 3px;">بچه‌های نصر</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">شهرستان جهرم</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; color: var(--text-muted);">۱.۹۵</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         صفحه ۵: گفتگوها و پیام‌ها (MESSAGES)
+         ========================================== -->
+    <div id="page-messages" class="page-view">
+        <div style="padding: 18px 20px; font-size: 1.1rem; font-weight: 900; color: var(--text-white); border-bottom: 1px solid var(--border-teal); display: flex; justify-content: space-between; align-items: center;">
+            <span>گفتگوها و کانال‌ها</span>
+            <span style="font-size: 0.78rem; color: var(--accent-teal-light); background: rgba(14, 165, 164, 0.15); padding: 4px 10px; border-radius: 12px;">آنلاین</span>
+        </div>
+
+        <!-- کانال مستقیم روبیکا (Rubika) -->
+        <a href="https://rubika.ir/joing/BBFBBCAGF0HLHTGNNECLIQUPIYQAUKYY" target="_blank" style="display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); text-decoration: none; background: linear-gradient(90deg, rgba(117, 23, 132, 0.15) 0%, rgba(8, 25, 34, 0) 100%); transition: var(--transition-fast);">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #a020f0, #5c0f8c); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.4rem; color: white; margin-left: 14px; box-shadow: 0 4px 15px rgba(160, 32, 240, 0.4); flex-shrink: 0;">R</div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="font-weight: 900; font-size: 0.98rem; color: #e066ff;">کانال روبیکا (بچه‌های علی لندی)</div>
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">رسمی</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">جهت عضویت و مشاهده اخبار اصلی کلیک کنید</div>
+            </div>
+        </a>
+
+        <!-- کانال مستقیم ایتا (Eitaa) -->
+        <a href="https://eitaa.com/joinchat/2506294995Ce4d2342f99" target="_blank" style="display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); text-decoration: none; background: linear-gradient(90deg, rgba(229, 75, 24, 0.15) 0%, rgba(8, 25, 34, 0) 100%); transition: var(--transition-fast);">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #e54b18, #9e2d09); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.4rem; color: white; margin-left: 14px; box-shadow: 0 4px 15px var(--accent-orange-glow); flex-shrink: 0;">E</div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="font-weight: 900; font-size: 0.98rem; color: var(--accent-gold);">کانال ایتا (اطلاع‌رسانی)</div>
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">رسمی</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">عضویت مستقیم در گروه اصلی ایتا</div>
+            </div>
+        </a>
+
+        <!-- سایر چت‌ها و گفتگوهای شخصی (بدون عکس) -->
+        <div style="display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;" onclick="triggerToast('ارسال پیام در این گروه محدود شده است')">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #163646; border: 1px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; color: var(--accent-teal); margin-left: 14px; flex-shrink: 0;">باشگاه</div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white);">باشگاه علی لندی</div>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">۱۰:۴۵</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">سرگروه: تمرین‌های این هفته ثبت شد...</div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;" onclick="triggerToast('گفتگوی شخصی با محمد کریمی صابر')">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #163646; border: 1px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; color: var(--accent-teal); margin-left: 14px; flex-shrink: 0;">م</div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white);">محمد کریمی صابر</div>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">دیروز</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">سبحان جان گزارش این هفته رو بررسی کردم.</div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;" onclick="triggerToast('گفتگوی شخصی با علی دستگیر')">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #163646; border: 1px solid var(--accent-teal); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; color: var(--accent-teal); margin-left: 14px; flex-shrink: 0;">ع</div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-white);">علی دستگیر</div>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">۳ روز پیش</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">سلام، فردا ساعت ۴ جلسه داریم.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         صفحه ۶: امکانات بیشتر (MORE MENU)
+         ========================================== -->
+    <div id="page-more" class="page-view">
+        <div style="padding: 20px 20px 10px; font-weight: 900; font-size: 1.2rem; color: var(--text-white);">منوی امکانات و خدمات</div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 16px;">
+            <!-- خدمت‌های من -->
+            <div onclick="triggerToast('بخش خدمت‌های من')" style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border-teal); cursor: pointer; transition: var(--transition-fast);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(14, 165, 164, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-teal-light)">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-white);">خدمت‌های من</span>
+            </div>
+
+            <!-- لینک کانال روبیکا -->
+            <div onclick="window.open('https://rubika.ir/joing/BBFBBCAGF0HLHTGNNECLIQUPIYQAUKYY', '_blank')" style="background: linear-gradient(135deg, #751784 0%, #400a4a 100%); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid #a020f0; cursor: pointer; transition: var(--transition-fast); box-shadow: 0 4px 15px rgba(160, 32, 240, 0.3);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-weight: 900; font-size: 1.3rem; color: white;">R</div>
+                <span style="font-size: 0.8rem; font-weight: 900; color: white;">کانال روبیکا</span>
+            </div>
+
+            <!-- لینک کانال ایتا -->
+            <div onclick="window.open('https://eitaa.com/joinchat/2506294995Ce4d2342f99', '_blank')" style="background: linear-gradient(135deg, #e54b18 0%, #7e2406 100%); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--accent-orange); cursor: pointer; transition: var(--transition-fast); box-shadow: 0 4px 15px var(--accent-orange-glow);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-weight: 900; font-size: 1.3rem; color: white;">E</div>
+                <span style="font-size: 0.8rem; font-weight: 900; color: white;">کانال ایتا</span>
+            </div>
+
+            <!-- بازی -->
+            <div onclick="triggerToast('بخش بازی‌های معارفی به‌زودی...')" style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border-teal); cursor: pointer; transition: var(--transition-fast);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(14, 165, 164, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-teal-light)">
+                        <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 10 19.5 10s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                    </svg>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-white);">بازی</span>
+            </div>
+
+            <!-- تیراندازی من -->
+            <div onclick="triggerToast('سامانه ثبت امتیازات تیراندازی')" style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border-teal); cursor: pointer; transition: var(--transition-fast);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(14, 165, 164, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-teal-light)">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm4-9H8v2h8v-2z"/>
+                    </svg>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-white);">تیراندازی من</span>
+            </div>
+
+            <!-- کارنامه -->
+            <div onclick="triggerToast('کارنامه عملکرد فصل پاییز')" style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border-teal); cursor: pointer; transition: var(--transition-fast);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(245, 176, 39, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-gold)">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-white);">کارنامه</span>
+            </div>
+
+            <!-- پشتیبانی -->
+            <div onclick="triggerToast('ارسال پیام به پشتیبانی مرکزی')" style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border-teal); cursor: pointer; transition: var(--transition-fast);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(14, 165, 164, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-teal-light)">
+                        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
+                    </svg>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-white);">پشتیبانی</span>
+            </div>
+
+            <!-- تنظیمات -->
+            <div onclick="triggerToast('تنظیمات حساب کاربری')" style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border-teal); cursor: pointer; transition: var(--transition-fast);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(14, 165, 164, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-teal-light)">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-white);">تنظیمات</span>
+            </div>
+
+            <!-- خروج از حساب -->
+            <div onclick="confirmLogoutAction()" style="background: rgba(229, 75, 24, 0.1); border-radius: var(--radius-lg); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border-orange); cursor: pointer; transition: var(--transition-fast);">
+                <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(229, 75, 24, 0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--accent-orange)">
+                        <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 900; color: var(--accent-orange);">خروج</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         سیستم اعلان پیام‌های موقت (TOAST BANNER)
+         ========================================== -->
+    <div id="toast-banner" style="position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(100px); background: linear-gradient(135deg, var(--accent-teal), #087372); color: white; padding: 12px 24px; border-radius: var(--radius-full); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-deep); z-index: 3000; opacity: 0; transition: var(--transition-bounce); pointer-events: none;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        <span id="toast-message-text">پیام جدید سیستم</span>
+    </div>
+
+    <!-- ==========================================
+         منوی ناوبری پایینی (BOTTOM NAVIGATION BAR)
+         ========================================== -->
+    <nav class="bottom-navigation-bar" id="app-bottom-nav" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 75px; background: linear-gradient(180deg, #06131a 0%, #030a0e 100%); border-top: 1px solid var(--border-teal); display: none; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 4px;">
+        
+        <!-- ۱. بیشتر -->
+        <div class="nav-button-item" onclick="switchAppPage('more', this)" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: var(--text-muted); cursor: pointer; transition: var(--transition-fast);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+            </svg>
+            <span style="font-size: 0.72rem; font-weight: 800; margin-top: 4px;">بیشتر</span>
+        </div>
+
+        <!-- ۲. پیام‌ها -->
+        <div class="nav-button-item" onclick="switchAppPage('messages', this)" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: var(--text-muted); cursor: pointer; transition: var(--transition-fast);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+            </svg>
+            <span style="font-size: 0.72rem; font-weight: 800; margin-top: 4px;">پیام‌ها</span>
+        </div>
+
+        <!-- ۳. برنامه‌ها -->
+        <div class="nav-button-item" onclick="switchAppPage('plans', this)" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: var(--text-muted); cursor: pointer; transition: var(--transition-fast);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+            </svg>
+            <span style="font-size: 0.72rem; font-weight: 800; margin-top: 4px;">برنامه‌ها</span>
+        </div>
+
+        <!-- ۴. گروه -->
+        <div class="nav-button-item" onclick="switchAppPage('home', this)" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: var(--text-muted); cursor: pointer; transition: var(--transition-fast);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span style="font-size: 0.72rem; font-weight: 800; margin-top: 4px;">گروه</span>
+        </div>
+
+        <!-- ۵. رتبه‌بندی -->
+        <div class="nav-button-item" onclick="switchAppPage('ranking', this)" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: var(--text-muted); cursor: pointer; transition: var(--transition-fast);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+            <span style="font-size: 0.72rem; font-weight: 800; margin-top: 4px;">رتبه‌بندی</span>
+        </div>
+
+        <!-- ۶. پروفایل (پیش‌فرض فعال) -->
+        <div class="nav-button-item active-nav-tab" onclick="switchAppPage('profile', this)" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: var(--accent-teal-light); cursor: pointer; transition: var(--transition-fast);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            <span style="font-size: 0.72rem; font-weight: 900; margin-top: 4px;">پروفایل</span>
+        </div>
+
+    </nav>
+
+</div> <!-- پایان کانتینر اصلی موبایل (app-shell) -->
+
+<!-- ==========================================
+     کدهای کامل جاوااسکریپت و تعاملی برنامه
+     ========================================== -->
+<script>
+    /**
+     * سیستم ناوبری و سوئیچ بین صفحات اپلیکیشن
+     */
+    function switchAppPage(pageTargetId, clickedNavElement) {
+        // ۱. مخفی کردن تمام صفحات
+        const allPages = document.querySelectorAll('.page-view');
+        allPages.forEach(page => {
+            page.classList.remove('active');
+            page.style.display = 'none';
+        });
+
+        // ۲. غیرفعال کردن تمام آیتم‌های منوی پایین
+        const allNavItems = document.querySelectorAll('.nav-button-item');
+        allNavItems.forEach(item => {
+            item.style.color = 'var(--text-muted)';
+            const textSpan = item.querySelector('span');
+            if(textSpan) textSpan.style.fontWeight = '800';
+        });
+
+        // ۳. فعال‌سازی صفحه مورد نظر
+        const targetPage = document.getElementById('page-' + pageTargetId);
+        if (targetPage) {
+            targetPage.style.display = 'block';
+            setTimeout(() => {
+                targetPage.classList.add('active');
+            }, 10);
+        }
+
+        // ۴. استایل‌دهی دکمه فعال در منوی پایین
+        if (clickedNavElement) {
+            clickedNavElement.style.color = 'var(--accent-teal-light)';
+            const textSpan = clickedNavElement.querySelector('span');
+            if(textSpan) textSpan.style.fontWeight = '900';
+        }
+
+        // ۵. بازخورد لمسی (ویبره خفیف در موبایل)
+        triggerHapticVibration();
+    }
+
+    /**
+     * اکشن ورود به حساب کاربری
+     */
+    function handleLoginAction() {
+        const loginBtn = document.querySelector('.btn-submit-login');
+        if (loginBtn) {
+            loginBtn.innerText = 'در حال احراز هویت...';
+            loginBtn.style.opacity = '0.75';
+            loginBtn.style.pointerEvents = 'none';
+        }
+
+        triggerHapticVibration();
+
+        setTimeout(() => {
+            const loginScreen = document.getElementById('login-screen');
+            const mainHeader = document.getElementById('app-top-header');
+            const bottomNav = document.getElementById('app-bottom-nav');
+
+            if (loginScreen) loginScreen.style.display = 'none';
+            if (mainHeader) mainHeader.style.display = 'flex';
+            if (bottomNav) bottomNav.style.display = 'flex';
+
+            triggerToast('سلام محمد سبحان اوحدی! خوش آمدید.');
+        }, 1200);
+    }
+
+    /**
+     * ثبت تعاملی نمازهای روزانه
+     */
+    let completedPrayersCount = 0;
+    function togglePrayerCheck(element) {
+        const checkIcon = element.querySelector('div:last-child');
+        
+        if (checkIcon.style.color === 'transparent' || !checkIcon.style.color) {
+            checkIcon.style.color = 'white';
+            checkIcon.style.backgroundColor = 'var(--accent-teal)';
+            element.style.borderColor = 'var(--accent-teal-light)';
+            element.style.background = 'rgba(14, 165, 164, 0.12)';
+            completedPrayersCount++;
+        } else {
+            checkIcon.style.color = 'transparent';
+            checkIcon.style.backgroundColor = 'transparent';
+            element.style.borderColor = 'var(--border-teal)';
+            element.style.background = 'var(--bg-input)';
+            completedPrayersCount--;
+        }
+
+        if (completedPrayersCount < 0) completedPrayersCount = 0;
+        if (completedPrayersCount > 5) completedPrayersCount = 5;
+
+        const badge = document.getElementById('prayer-count-badge');
+        if (badge) {
+            badge.innerText = completedPrayersCount + ' از ۵';
+        }
+
+        triggerHapticVibration();
+        triggerToast('وضعیت نماز بروزرسانی شد: ' + completedPrayersCount + ' از ۵');
+    }
+
+    /**
+     * تغییر تب‌های صفحه رتبه‌بندی
+     */
+    function switchRankingTab(tabElement, category) {
+        const tabs = document.querySelectorAll('.ranking-tab-btn');
+        tabs.forEach(t => {
+            t.style.background = 'transparent';
+            t.style.color = 'var(--text-muted)';
+        });
+
+        tabElement.style.background = 'var(--accent-teal)';
+        tabElement.style.color = 'white';
+
+        triggerHapticVibration();
+        triggerToast('در حال دریافت لیست ' + tabElement.innerText + '...');
+    }
+
+    /**
+     * نمایش بنر اعلان توست (Toast Notification)
+     */
+    let toastTimeoutId = null;
+    function triggerToast(message) {
+        const toastBanner = document.getElementById('toast-banner');
+        const toastText = document.getElementById('toast-message-text');
+
+        if (!toastBanner || !toastText) return;
+
+        toastText.innerText = message;
+        toastBanner.style.opacity = '1';
+        toastBanner.style.transform = 'translateX(-50%) translateY(0)';
+
+        if (toastTimeoutId) clearTimeout(toastTimeoutId);
+
+        toastTimeoutId = setTimeout(() => {
+            toastBanner.style.opacity = '0';
+            toastBanner.style.transform = 'translateX(-50%) translateY(100px)';
+        }, 2800);
+    }
+
+    /**
+     * خروج از حساب کاربری
+     */
+    function confirmLogoutAction() {
+        if (confirm('آیا مطمئن هستید که می‌خواهید از حساب کاربری خارج شوید؟')) {
+            location.reload();
+        }
+    }
+
+    /**
+     * ایجاد لرزش (Haptic Feedback) برای تجربه واقعی‌تر اپلیکیشن
+     */
+    function triggerHapticVibration() {
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(25);
+        }
+    }
+
+    // جلوگیری از رفتارهای پیش‌فرض کشیدن صفحه در موبایل
+    document.addEventListener('touchmove', function (e) {
+        if (e.scale !== 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+</script>
+
+</body>
+</html>

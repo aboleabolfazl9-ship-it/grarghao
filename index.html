@@ -534,6 +534,60 @@
             transform: scale(0.97);
             opacity: 0.9;
         }
+
+        /* ==========================================
+           ۱۰. فرم ورود / ثبت‌نام
+           ========================================== */
+        .form-input-field {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .login-overlay {
+            overflow-y: auto;
+            justify-content: flex-start;
+        }
+        .login-overlay > * { flex-shrink: 0; }
+        .login-emblem-box { margin-top: auto; }
+        .login-form-card { margin-bottom: auto; }
+
+        .auth-tabs {
+            display: flex;
+            background: var(--bg-darker);
+            border: 1px solid var(--border-teal);
+            border-radius: var(--radius-full);
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: var(--radius-full);
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .auth-tab.active {
+            background: var(--accent-teal);
+            color: #fff;
+        }
+        .auth-error {
+            min-height: 20px;
+            color: #ff7a59;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        .field-hint {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            padding-right: 4px;
+        }
     </style>
 </head>
 <body>
@@ -553,14 +607,30 @@
         <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 26px;">اپلیکیشن اختصاصی بچه‌های علی لندی</p>
 
         <div class="login-form-card">
-            <div class="form-group-item">
-                <input type="text" class="form-input-field" value="sobhan_owhadi" placeholder="نام کاربری">
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" id="tab-login" onclick="setAuthMode('login')">ورود</button>
+                <button type="button" class="auth-tab" id="tab-register" onclick="setAuthMode('register')">ثبت‌نام</button>
+            </div>
+
+            <div class="form-group-item" id="group-fullname" style="display: none;">
+                <input type="text" id="auth-fullname" class="form-input-field" placeholder="نام و نام خانوادگی" autocomplete="name" maxlength="40">
             </div>
             <div class="form-group-item">
-                <input type="password" class="form-input-field" value="••••••••" placeholder="رمز عبور">
+                <input type="text" id="auth-username" class="form-input-field" placeholder="نام کاربری (انگلیسی)" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" dir="ltr" style="text-align: left;">
+                <div class="field-hint" id="hint-username" style="display: none;">۳ تا ۲۰ حرف انگلیسی، عدد یا _ (مثال: ali_123)</div>
             </div>
-            <button class="btn-submit-login" onclick="handleLoginAction()">ورود به حساب کاربری</button>
-            <div style="text-align: center; margin-top: 16px;">
+            <div class="form-group-item">
+                <input type="password" id="auth-password" class="form-input-field" placeholder="رمز عبور" autocomplete="current-password" dir="ltr" style="text-align: left;">
+                <div class="field-hint" id="hint-password" style="display: none;">حداقل ۶ کاراکتر</div>
+            </div>
+            <div class="form-group-item" id="group-confirm" style="display: none;">
+                <input type="password" id="auth-confirm" class="form-input-field" placeholder="تکرار رمز عبور" autocomplete="new-password" dir="ltr" style="text-align: left;">
+            </div>
+
+            <div class="auth-error" id="auth-error"></div>
+
+            <button type="button" class="btn-submit-login" id="auth-submit" onclick="handleAuthSubmit()">ورود به حساب کاربری</button>
+            <div style="text-align: center; margin-top: 16px;" id="forgot-wrap">
                 <span style="font-size: 0.8rem; color: var(--accent-teal-light); cursor: pointer;" onclick="triggerToast('بازیابی رمز عبور به سرگروه پیام دهید')">رمز عبور خود را فراموش کرده‌اید؟</span>
             </div>
         </div>
@@ -592,17 +662,14 @@
         <div class="profile-banner">
             <div class="avatar-ring-wrapper">
                 <div class="avatar-ring-glow"></div>
-                <div class="avatar-inner-box">
-                    <!-- عکس اختصاصی سبحان -->
-                    <img src="sobhan.jpg" alt="محمد سبحان اوحدی" onerror="this.onerror=null; this.outerHTML='<div class=&quot;avatar-fallback-initial&quot;>س</div>';">
-                </div>
+                <div class="avatar-inner-box" id="profile-avatar"></div>
             </div>
-            <h1 class="profile-user-name">محمد سبحان اوحدی</h1>
+            <h1 class="profile-user-name" id="profile-name">...</h1>
             <div class="profile-date-badge">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
                 </svg>
-                <span>عضویت از اردیبهشت ماه ۱۴۰۵</span>
+                <span id="profile-join-text">عضویت جدید</span>
             </div>
 
             <!-- نشان‌های سه‌گانه همت (۳)، جنم (۰)، الماس (۰) -->
@@ -619,7 +686,7 @@
                             </defs>
                             <path d="M25 0 L50 10 L50 35 C50 50 25 60 25 60 C25 60 0 50 0 35 L0 10 Z" fill="url(#goldGrad)" />
                             <path d="M8 38 L42 38 L42 44 Q25 54 8 44 Z" fill="#e54b18" />
-                            <text x="50%" y="45" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="900">۳</text>
+                            <text x="50%" y="45" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="900" id="badge-himmat">۰</text>
                             <path d="M25 12 L28 19 L35 19 L30 24 L32 31 L25 27 L18 31 L20 24 L15 19 L22 19 Z" fill="#081922" />
                         </svg>
                     </div>
@@ -696,95 +763,11 @@
         </div>
 
         <div class="members-section-header">
-            <span class="members-count-title">اعضای گروه (۱۰ نفر)</span>
+            <span class="members-count-title" id="members-count-title">اعضای گروه</span>
             <span style="font-size: 0.78rem; color: var(--accent-teal-light);">ترتیب بر اساس امتیاز</span>
         </div>
 
-        <!-- لیست ۱۰ عضو اصلی - فقط سبحان عکس دارد -->
-        <div class="member-row-item">
-            <div class="member-avatar-box is-sobhan">
-                <img src="sobhan.jpg" alt="سبحان" onerror="this.outerHTML='س';">
-            </div>
-            <div class="member-details">
-                <div class="member-name-text">
-                    <span>محمد سبحان اوحدی</span>
-                    <span class="member-self-tag">شما</span>
-                </div>
-                <div class="member-score-text">امتیاز کل: ۷۳۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">ح</div>
-            <div class="member-details">
-                <div class="member-name-text">حسین اکبری</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">ا</div>
-            <div class="member-details">
-                <div class="member-name-text">امیرعلی استقلال</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">ب</div>
-            <div class="member-details">
-                <div class="member-name-text">بردیا بهمنی</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">م</div>
-            <div class="member-details">
-                <div class="member-name-text">محمدامین مصلی‌نژاد</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">م</div>
-            <div class="member-details">
-                <div class="member-name-text">ماهان عاصی شیرازی</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">ع</div>
-            <div class="member-details">
-                <div class="member-name-text">علی محمدی</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">ر</div>
-            <div class="member-details">
-                <div class="member-name-text">رضا کریمی</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">م</div>
-            <div class="member-details">
-                <div class="member-name-text">مهدی حسینی</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
-
-        <div class="member-row-item">
-            <div class="member-avatar-box">ی</div>
-            <div class="member-details">
-                <div class="member-name-text">یوسف رضایی</div>
-                <div class="member-score-text">امتیاز کل: ۰</div>
-            </div>
-        </div>
+        <div id="members-list"></div>
     </div>
         <!-- ==========================================
          صفحه ۳: برنامه‌ها و پنل رشد (PLANS & GROWTH)
@@ -795,7 +778,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div>
                     <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--accent-teal-light); margin-bottom: 4px;">پنل رشد معنوی و تربیتی</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-muted);">گزارش عملکرد روزانه محمد سبحان اوحدی</p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">گزارش عملکرد روزانه <span id="plans-user-name"></span></p>
                 </div>
                 <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--accent-teal-glow); display: flex; align-items: center; justify-content: center; border: 1px solid var(--accent-teal-light);">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="var(--accent-teal-light)">
@@ -1274,29 +1257,254 @@
     }
 
     /**
-     * اکشن ورود به حساب کاربری
+     * ==========================================
+     * سیستم ثبت‌نام و ورود (ذخیره در مرورگر هر گوشی)
+     * ==========================================
      */
-    function handleLoginAction() {
-        const loginBtn = document.querySelector('.btn-submit-login');
-        if (loginBtn) {
-            loginBtn.innerText = 'در حال احراز هویت...';
-            loginBtn.style.opacity = '0.75';
-            loginBtn.style.pointerEvents = 'none';
+    const USERS_KEY = 'ali_landi_users_v1';
+    const SESSION_KEY = 'ali_landi_session_v1';
+
+    // اعضای نمونه‌ی گروه
+    const MEMBERS = [
+        { name: 'محمد سبحان اوحدی', score: 730, himmat: 3, photo: 'sobhan.jpg' },
+        { name: 'حسین اکبری', score: 0, himmat: 0 },
+        { name: 'امیرعلی استقلال', score: 0, himmat: 0 },
+        { name: 'بردیا بهمنی', score: 0, himmat: 0 },
+        { name: 'محمدامین مصلی‌نژاد', score: 0, himmat: 0 },
+        { name: 'ماهان عاصی شیرازی', score: 0, himmat: 0 },
+        { name: 'علی محمدی', score: 0, himmat: 0 },
+        { name: 'رضا کریمی', score: 0, himmat: 0 },
+        { name: 'مهدی حسینی', score: 0, himmat: 0 },
+        { name: 'یوسف رضایی', score: 0, himmat: 0 }
+    ];
+
+    let authMode = 'login';
+    let currentUser = null;
+
+    function byId(id) { return document.getElementById(id); }
+
+    function readStore(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (e) { return fallback; }
+    }
+
+    function writeStore(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (e) { return false; }
+    }
+
+    function faToEn(str) {
+        return str
+            .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+            .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    }
+
+    function normalizeUsername(s) { return faToEn(s.trim()).toLowerCase(); }
+
+    function normalizeName(s) {
+        return s.replace(/\s+/g, ' ').replace(/ي/g, 'ی').replace(/ك/g, 'ک').trim();
+    }
+
+    async function hashPassword(password, salt) {
+        const text = salt + ':' + password;
+        if (window.crypto && window.crypto.subtle && window.TextEncoder) {
+            try {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) { /* ادامه با روش جایگزین */ }
+        }
+        let h = 5381;
+        for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+        return 'f' + (h >>> 0).toString(16);
+    }
+
+    function showAuthError(msg) {
+        const box = byId('auth-error');
+        if (box) box.textContent = msg || '';
+    }
+
+    function setAuthMode(mode) {
+        authMode = mode;
+        const isReg = mode === 'register';
+        byId('tab-login').classList.toggle('active', !isReg);
+        byId('tab-register').classList.toggle('active', isReg);
+        byId('group-fullname').style.display = isReg ? 'block' : 'none';
+        byId('group-confirm').style.display = isReg ? 'block' : 'none';
+        byId('hint-username').style.display = isReg ? 'block' : 'none';
+        byId('hint-password').style.display = isReg ? 'block' : 'none';
+        byId('forgot-wrap').style.display = isReg ? 'none' : 'block';
+        byId('auth-password').setAttribute('autocomplete', isReg ? 'new-password' : 'current-password');
+        byId('auth-submit').innerText = isReg ? 'ساخت حساب کاربری' : 'ورود به حساب کاربری';
+        showAuthError('');
+    }
+
+    async function handleAuthSubmit() {
+        const btn = byId('auth-submit');
+        showAuthError('');
+
+        const username = normalizeUsername(byId('auth-username').value);
+        const password = byId('auth-password').value;
+
+        if (!username || !password) {
+            showAuthError('نام کاربری و رمز عبور را وارد کنید.');
+            return;
         }
 
-        triggerHapticVibration();
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.75';
+        const originalText = btn.innerText;
+        btn.innerText = 'در حال بررسی...';
+        const restoreButton = () => {
+            btn.style.pointerEvents = '';
+            btn.style.opacity = '';
+            btn.innerText = originalText;
+        };
 
-        setTimeout(() => {
-            const loginScreen = document.getElementById('login-screen');
-            const mainHeader = document.getElementById('app-top-header');
-            const bottomNav = document.getElementById('app-bottom-nav');
+        try {
+            const users = readStore(USERS_KEY, {});
 
-            if (loginScreen) loginScreen.style.display = 'none';
-            if (mainHeader) mainHeader.style.display = 'flex';
-            if (bottomNav) bottomNav.style.display = 'flex';
+            if (authMode === 'register') {
+                const fullName = normalizeName(byId('auth-fullname').value);
+                const confirmPass = byId('auth-confirm').value;
 
-            triggerToast('سلام محمد سبحان اوحدی! خوش آمدید.');
-        }, 1200);
+                if (fullName.length < 3) { showAuthError('نام و نام خانوادگی را کامل وارد کنید.'); return restoreButton(); }
+                if (!/^[a-z0-9_]{3,20}$/.test(username)) { showAuthError('نام کاربری باید ۳ تا ۲۰ حرف انگلیسی، عدد یا _ باشد.'); return restoreButton(); }
+                if (password.length < 6) { showAuthError('رمز عبور باید حداقل ۶ کاراکتر باشد.'); return restoreButton(); }
+                if (password !== confirmPass) { showAuthError('رمز عبور و تکرار آن یکسان نیست.'); return restoreButton(); }
+                if (users[username]) { showAuthError('این نام کاربری قبلاً ثبت شده، یکی دیگه انتخاب کنید.'); return restoreButton(); }
+
+                const salt = Math.random().toString(36).slice(2) + Date.now().toString(36);
+                const hash = await hashPassword(password, salt);
+                const newUser = { username, fullName, salt, hash, createdAt: Date.now() };
+                users[username] = newUser;
+
+                if (!writeStore(USERS_KEY, users)) {
+                    showAuthError('ذخیره‌سازی در مرورگر ممکن نشد (شاید حالت ناشناس روشنه).');
+                    return restoreButton();
+                }
+                writeStore(SESSION_KEY, username);
+                triggerHapticVibration();
+                enterApp(newUser, 'ثبت‌نام انجام شد. خوش آمدید ' + fullName + '!');
+            } else {
+                const user = users[username];
+                const hash = user ? await hashPassword(password, user.salt) : null;
+                if (!user || hash !== user.hash) {
+                    showAuthError('نام کاربری یا رمز عبور اشتباه است.');
+                    return restoreButton();
+                }
+                writeStore(SESSION_KEY, username);
+                triggerHapticVibration();
+                enterApp(user, 'سلام ' + user.fullName + '! خوش آمدید.');
+            }
+        } catch (err) {
+            showAuthError('خطایی رخ داد، دوباره تلاش کنید.');
+            restoreButton();
+        }
+    }
+
+    function buildAvatar(container, photo, name, isProfile) {
+        container.textContent = '';
+        const initial = Array.from(name.trim())[0] || '؟';
+        const showInitial = () => {
+            container.textContent = '';
+            if (isProfile) {
+                const d = document.createElement('div');
+                d.className = 'avatar-fallback-initial';
+                d.textContent = initial;
+                container.appendChild(d);
+            } else {
+                container.textContent = initial;
+            }
+        };
+        if (photo) {
+            const img = document.createElement('img');
+            img.alt = name;
+            img.onerror = showInitial;
+            img.src = photo;
+            container.appendChild(img);
+        } else {
+            showInitial();
+        }
+    }
+
+    function renderMembers(user, matchedMember) {
+        const list = MEMBERS.map(m => ({ ...m, self: m === matchedMember }));
+        if (!matchedMember) list.push({ name: user.fullName, score: 0, himmat: 0, self: true });
+        list.sort((x, y) => y.score - x.score);
+
+        const container = byId('members-list');
+        container.textContent = '';
+
+        list.forEach(m => {
+            const row = document.createElement('div');
+            row.className = 'member-row-item';
+
+            const av = document.createElement('div');
+            av.className = 'member-avatar-box' + (m.photo ? ' is-sobhan' : '');
+            buildAvatar(av, m.photo, m.name, false);
+
+            const details = document.createElement('div');
+            details.className = 'member-details';
+
+            const nameRow = document.createElement('div');
+            nameRow.className = 'member-name-text';
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = m.name;
+            nameRow.appendChild(nameSpan);
+            if (m.self) {
+                const tag = document.createElement('span');
+                tag.className = 'member-self-tag';
+                tag.textContent = 'شما';
+                nameRow.appendChild(tag);
+            }
+
+            const score = document.createElement('div');
+            score.className = 'member-score-text';
+            score.textContent = 'امتیاز کل: ' + m.score.toLocaleString('fa-IR');
+
+            details.appendChild(nameRow);
+            details.appendChild(score);
+            row.appendChild(av);
+            row.appendChild(details);
+            container.appendChild(row);
+        });
+
+        byId('members-count-title').textContent = 'اعضای گروه (' + list.length.toLocaleString('fa-IR') + ' نفر)';
+    }
+
+    function applyUserToUI(user) {
+        const matched = MEMBERS.find(m => normalizeName(m.name) === normalizeName(user.fullName));
+
+        byId('profile-name').textContent = user.fullName;
+        byId('plans-user-name').textContent = user.fullName;
+        buildAvatar(byId('profile-avatar'), matched ? matched.photo : null, user.fullName, true);
+        byId('badge-himmat').textContent = (matched ? matched.himmat : 0).toLocaleString('fa-IR');
+
+        let joinText = 'عضویت جدید';
+        try {
+            joinText = 'عضویت از ' + new Date(user.createdAt).toLocaleDateString('fa-IR-u-ca-persian', { year: 'numeric', month: 'long' });
+        } catch (e) { /* ادامه با متن پیش‌فرض */ }
+        byId('profile-join-text').textContent = joinText;
+
+        renderMembers(user, matched);
+    }
+
+    function enterApp(user, greeting) {
+        currentUser = user;
+        applyUserToUI(user);
+
+        byId('login-screen').style.display = 'none';
+        byId('app-top-header').style.display = 'flex';
+        byId('app-bottom-nav').style.display = 'flex';
+
+        byId('auth-password').value = '';
+        byId('auth-confirm').value = '';
+
+        if (greeting) triggerToast(greeting);
     }
 
     /**
@@ -1376,6 +1584,7 @@
      */
     function confirmLogoutAction() {
         if (confirm('آیا مطمئن هستید که می‌خواهید از حساب کاربری خارج شوید؟')) {
+            try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* نادیده */ }
             location.reload();
         }
     }
@@ -1395,6 +1604,18 @@
             e.preventDefault();
         }
     }, { passive: false });
+
+    // راه‌اندازی اولیه: Enter برای ارسال فرم + ورود خودکار اگر قبلاً وارد شده
+    document.querySelectorAll('#login-screen input').forEach(input => {
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') handleAuthSubmit(); });
+    });
+    setAuthMode('login');
+    (function restoreSession() {
+        const savedUsername = readStore(SESSION_KEY, null);
+        if (!savedUsername) return;
+        const users = readStore(USERS_KEY, {});
+        if (users[savedUsername]) enterApp(users[savedUsername], null);
+    })();
 </script>
 
 </body>
